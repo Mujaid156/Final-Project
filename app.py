@@ -47,9 +47,6 @@ def fetch_users():
     return new_data
 
 
-users = fetch_users()
-
-
 # Creating the user table and giving it values
 def register_user_table():
     conn = sqlite3.connect('shopping.db')
@@ -63,6 +60,8 @@ def register_user_table():
     print("User table created successfully.")
     conn.close()
 
+register_user_table()
+users = fetch_users()
 
 class Cart(object):
     def __init__(self, item_id, product_name, product_type, description, product_quantity, product_price, price_total):
