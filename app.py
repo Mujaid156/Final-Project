@@ -29,6 +29,7 @@ class User(object):
         self.username = username
         self.password = password
 
+
 def fetch_users():
     with sqlite3.connect('furniture.db') as conn:
         cursor = conn.cursor()
@@ -174,6 +175,7 @@ def user_info(user_id):
 
     return jsonify(response)
 
+
 @app.route('/products/', methods=["POST"])
 def products():
     response = {}
@@ -201,6 +203,7 @@ def products():
     except Exception as e:
         return e
 
+
 @app.route('/get-product/<int:item_id>', methods=["GET"])
 def get_product(item_id):
     response = {}
@@ -209,10 +212,56 @@ def get_product(item_id):
         cursor.execute("SELECT * FROM store WHERE item_id=" + str(item_id))
 
         response["Status_code"] = 200
-        response["Description"] = "Cart retrieved successfully."
+        response["Description"] = "Item retrieved successfully."
         response["Data"] = cursor.fetchone()
 
     return jsonify(response)
+
+
+@app.route('/get-products/', methods=["GET"])
+def get_products():
+    response = {}
+    with sqlite3.connect("furniture.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM store")
+
+        response["Status_code"] = 200
+        response["Description"] = "Items retrieved successfully"
+        response["Data"] = cursor.fetchall()
+
+    return jsonify(response)
+
+
+@app.route('/update-products/<int:item_id>', methods=["PUT"])
+def update_products(item_id):
+    response = {}
+
+    if request.method == "PUT":
+        with sqlite3.connect('furniture.db') as conn:
+            incoming_data = dict(request.json)
+            put_data = {}
+
+            if incoming_data.get("product_price") is not None:
+                put_data["product_price"] = incoming_data.get("product_price")
+                with sqlite3.connect('furniture.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE store SET product_price =? WHERE item_id=?", (put_data["product_price"], item_id))
+                    conn.commit()
+                    response['Message'] = "Product price updated"
+                    response['Status_code'] = 200
+    return response
+
+
+@app.route('/remove-item/<int:item_id>', methods=["DELETE"])
+def remove_item(item_id):
+    response = {}
+    with sqlite3.connect("furniture.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM store WHERE item_id=" + str(item_id))
+        conn.commit()
+        response['Status_code'] = 200
+        response['Message'] = "Item removed successfully."
+    return response
 
 
 if __name__ == '__main__':
