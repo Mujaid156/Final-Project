@@ -132,12 +132,27 @@ def protected():
     return '%s' % current_identity
 
 
-@app.route('/user-registration/', methods=["POST"])
+@app.route('/user-registration/', methods=["POST", "PATCH"])
 def user_registration():
     mail = Mail(app)
     response = {}
 
     try:
+        if request.method == "PATCH":
+            email = request.json["email"]
+            password = request.json["password"]
+
+            with sqlite3.connect("furniture.db") as conn:
+                conn.row_factory = dict_factory
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM user WHERE email=? and passowrd=?", (email, password))
+                user = cursor.fetchone()
+
+                response['Status_code'] = 200
+                response['data'] = user
+                return response
+
+
         if request.method == "POST":
 
             username = request.json['first_name']
