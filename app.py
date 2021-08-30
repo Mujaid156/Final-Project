@@ -10,6 +10,12 @@ from flask_cors import CORS
 from flask_mail import Mail, Message
 from smtplib import SMTPRecipientsRefused
 
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
 # Start flask application
 app = Flask(__name__)
 
@@ -134,13 +140,14 @@ def user_registration():
     try:
         if request.method == "POST":
 
-            username = request.form['first_name']
-            last_name = request.form['last_name']
-            phone_number = request.form['phone_number']
-            email = request.form['email']
-            password = request.form['password']
+            username = request.json['first_name']
+            last_name = request.json['last_name']
+            phone_number = request.json['phone_number']
+            email = request.json['email']
+            password = request.json['password']
 
             with sqlite3.connect("furniture.db") as conn:
+                conn.row_factory = dict_factory
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO user("
                                "first_name,"
@@ -151,7 +158,7 @@ def user_registration():
                 conn.commit()
                 response["Message"] = "User registered successfully."
                 response["Status_code"] = 201
-                msg = Message('Hello' + username, sender='lifeacademy146@gmail.com',
+                msg = Message('Hello ' + username, sender='lifeacademy146@gmail.com',
                               recipients=[email])
                 msg.body = 'Thank you for registering with Checkers.'
                 mail.send(msg)
@@ -166,6 +173,7 @@ def user_registration():
 def user_info(user_id):
     response = {}
     with sqlite3.connect("furniture.db") as conn:
+        conn.row_factory = dict_factory
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM user WHERE id=" + str(user_id))
 
@@ -183,12 +191,13 @@ def products():
     try:
 
         if request.method == "POST":
-            product_name = request.form['product_name']
-            product_type = request.form['product_type']
-            description = request.form['description']
-            product_price = request.form['product_price']
+            product_name = request.json['product_name']
+            product_type = request.json['product_type']
+            description = request.json['description']
+            product_price = request.json['product_price']
 
             with sqlite3.connect("furniture.db") as conn:
+                conn.row_factory = dict_factory
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO store("
                                "product_name,"
