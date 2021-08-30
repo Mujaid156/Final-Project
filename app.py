@@ -138,7 +138,7 @@ def user_registration():
     response = {}
 
     try:
-        if request.method == "PATCH":
+        if request.method == "POST":
             email = request.json["email"]
             password = request.json["password"]
 
