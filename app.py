@@ -10,11 +10,13 @@ from flask_cors import CORS
 from flask_mail import Mail, Message
 from smtplib import SMTPRecipientsRefused
 
+
 def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
     return d
+
 
 # Start flask application
 app = Flask(__name__)
@@ -132,29 +134,27 @@ def protected():
     return '%s' % current_identity
 
 
-@app.route('/user-registration/', methods=["POST", "PATCH"])
+@app.route('/user-registration/', methods=["POST"])
 def user_registration():
     mail = Mail(app)
     response = {}
 
     try:
+        # if request.method == "POST":
+        #     email = request.json["email"]
+        #     password = request.json["password"]
+        #
+        #     with sqlite3.connect("furniture.db") as conn:
+        #         conn.row_factory = dict_factory
+        #         cursor = conn.cursor()
+        #         cursor.execute("SELECT * FROM user WHERE email=? and password=?", (email, password))
+        #         user = cursor.fetchone()
+        #
+        #         response['Status_code'] = 200
+        #         response['data'] = user
+        #         return response
+
         if request.method == "POST":
-            email = request.json["email"]
-            password = request.json["password"]
-
-            with sqlite3.connect("furniture.db") as conn:
-                conn.row_factory = dict_factory
-                cursor = conn.cursor()
-                cursor.execute("SELECT * FROM user WHERE email=? and passowrd=?", (email, password))
-                user = cursor.fetchone()
-
-                response['Status_code'] = 200
-                response['data'] = user
-                return response
-
-
-        if request.method == "POST":
-
             username = request.json['first_name']
             last_name = request.json['last_name']
             phone_number = request.json['phone_number']
@@ -182,6 +182,31 @@ def user_registration():
         response["Message"] = "Invalid email used."
         response["Status_code"] = 400
         return response
+
+
+@app.route('/login', methods=["PATCH"])
+def login():
+    response = {}
+    # Login using patch method
+    if request.method == "PATCH":
+        email = request.json["email"]
+        password = request.json["password"]
+
+        with sqlite3.connect("furniture.db") as conn:
+            conn.row_factory = dict_factory
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM user WHERE email=? AND password=?", (email, password))
+            admin = cursor.fetchone()
+
+        response['Message'] = "User loged in successfully"
+        response['Status_code'] = 200
+        response['data'] = admin
+        return response
+    else:
+        if request.method != "PATCH":
+            response['message'] = "Incorrect Method"
+            response['status_code'] = 400
+            return response
 
 
 @app.route('/user-info/<int:user_id>', methods=["GET"])
@@ -269,7 +294,8 @@ def update_products(item_id):
                 put_data["product_price"] = incoming_data.get("product_price")
                 with sqlite3.connect('furniture.db') as conn:
                     cursor = conn.cursor()
-                    cursor.execute("UPDATE store SET product_price =? WHERE item_id=?", (put_data["product_price"], item_id))
+                    cursor.execute("UPDATE store SET product_price =? WHERE item_id=?",
+                                   (put_data["product_price"], item_id))
                     conn.commit()
                     response['Message'] = "Product price updated"
                     response['Status_code'] = 200
