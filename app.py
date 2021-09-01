@@ -257,6 +257,7 @@ def products():
 def get_product(item_id):
     response = {}
     with sqlite3.connect("furniture.db") as conn:
+        conn.row_factory = dict_factory
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM store WHERE item_id=" + str(item_id))
 
