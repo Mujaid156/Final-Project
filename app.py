@@ -66,10 +66,10 @@ def register_table():
 
 
 class Store(object):
-    def __init__(self, item_id, product_name, product_type, description, product_price):
+    def __init__(self, item_id, product_name, image, description, product_price):
         self.id = item_id
         self.product_name = product_name
-        self.product_type = product_type
+        self.image = image
         self.description = description
         self.product_price = product_price
 
@@ -93,7 +93,7 @@ def product_table():
 
     conn.execute("CREATE TABLE IF NOT EXISTS store(item_id INTEGER PRIMARY KEY AUTOINCREMENT,"
                  "product_name TEXT NOT NULL,"
-                 "product_type TEXT NOT NULL,"
+                 "image TEXT NOT NULL,"
                  "description TEXT NOT NULL,"
                  "product_price INTEGER NOT NULL)")
     print("Store table created successfully.")
@@ -232,7 +232,7 @@ def products():
 
         if request.method == "POST":
             product_name = request.json['product_name']
-            product_type = request.json['product_type']
+            image = request.json['image']
             description = request.json['description']
             product_price = request.json['product_price']
 
@@ -241,14 +241,14 @@ def products():
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO store("
                                "product_name,"
-                               "product_type,"
+                               "image,"
                                "description,"
                                "product_price) VALUES(?, ?, ?, ?)",
-                               (product_name, product_type, description, product_price))
+                               (product_name, image, description, product_price))
                 conn.commit()
                 response["Message"] = "Product added successfully."
                 response["Status_code"] = 201
-                return response
+                return jsonify(response)
     except Exception as e:
         return e
 
