@@ -184,11 +184,11 @@ def user_registration():
         return response
 
 
-@app.route('/login', methods=["PATCH"])
+@app.route('/login', methods=["POST"])
 def login():
     response = {}
     # Login using patch method
-    if request.method == "PATCH":
+    if request.method == "POST":
         email = request.json["email"]
         password = request.json["password"]
 
@@ -198,12 +198,12 @@ def login():
             cursor.execute("SELECT * FROM user WHERE email=? AND password=?", (email, password))
             admin = cursor.fetchone()
 
-        response['Message'] = "User loged in successfully"
-        response['Status_code'] = 200
-        response['data'] = admin
-        return response
+            response['Message'] = "User loged in successfully"
+            response['Status_code'] = 200
+            response['data'] = admin
+            return response
     else:
-        if request.method != "PATCH":
+        if request.method != "POST":
             response['message'] = "Incorrect Method"
             response['status_code'] = 400
             return response
