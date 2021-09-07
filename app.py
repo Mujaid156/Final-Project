@@ -184,29 +184,26 @@ def user_registration():
         return response
 
 
-@app.route('/login', methods=["POST"])
-def login():
+@app.route('/login/', methods=["POST"])
+def login_user():
     response = {}
-    # Login using patch method
     if request.method == "POST":
-        email = request.json["email"]
+        phone_number = request.json["phone_number"]
         password = request.json["password"]
-
-        with sqlite3.connect("furniture.db") as conn:
-            conn.row_factory = dict_factory
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM user WHERE email=? AND password=?", (email, password))
-            admin = cursor.fetchone()
-
-            response['Message'] = "User loged in successfully"
-            response['Status_code'] = 200
-            response['data'] = admin
+        conn = sqlite3.connect("furniture.db")
+        c = conn.cursor()
+        statement = f"SELECT * FROM user WHERE phone_number='{phone_number}' and password ='{password}'"
+        c.execute(statement)
+        if not c.fetchone():
+            response['message'] = "failed"
+            response["status_code"] = 401
+            return response
+        else:
+            response['message'] = "welcome user"
+            response["status_code"] = 201
             return response
     else:
-        if request.method != "POST":
-            response['message'] = "Incorrect Method"
-            response['status_code'] = 400
-            return response
+        return "wrong method"
 
 
 @app.route('/user-info/<int:user_id>', methods=["GET"])
@@ -275,6 +272,21 @@ def get_products():
         conn.row_factory = dict_factory
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM store")
+
+        response["Status_code"] = 200
+        response["Description"] = "Items retrieved successfully"
+        response["Data"] = cursor.fetchall()
+
+    return jsonify(response)
+
+
+@app.route('/users/', methods=["GET"])
+def get_users():
+    response = {}
+    with sqlite3.connect("furniture.db") as conn:
+        conn.row_factory = dict_factory
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM user")
 
         response["Status_code"] = 200
         response["Description"] = "Items retrieved successfully"
