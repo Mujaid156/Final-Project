@@ -188,11 +188,11 @@ def user_registration():
 def login_user():
     response = {}
     if request.method == "POST":
-        first_name = request.json["first_name"]
+        username = request.json["first_name"]
         password = request.json["password"]
         conn = sqlite3.connect("furniture.db")
         c = conn.cursor()
-        statement = f"SELECT * FROM user WHERE first_name='{first_name}' and password ='{password}'"
+        statement = f"SELECT * FROM user WHERE first_name='{username}' and password ='{password}'"
         c.execute(statement)
         if not c.fetchone():
             response['message'] = "failed"
